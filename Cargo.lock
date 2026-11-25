@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "fastrand"
-version = "2.3.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
+checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
 name = "one-way-out"
@@ -18,6 +18,6 @@ dependencies = [
 
 [[package]]
 name = "telnet"
-version = "0.2.3"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "352d9f208bc79cc9e5e6612986e4c31537f3341eaa781de018458081ccc3a377"
+checksum = "01b97995bb05d87c31d04870a7b5393228017d12971d446e30d0739f484c5968"

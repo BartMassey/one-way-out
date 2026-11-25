@@ -2,6 +2,7 @@
 //! those attributes unique to each client.
 
 /// Player avatar state.
+#[derive(Clone)]
 pub struct Player {
     /// Player id. Globally unique across all sessions.
     pub id: u64,

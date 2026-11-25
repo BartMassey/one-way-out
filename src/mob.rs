@@ -4,6 +4,7 @@
 use crate::*;
 
 /// MOB state.
+#[derive(Clone)]
 pub struct Mob {
     /// MOB id. Globally unique across all sessions.
     pub id: u64,
@@ -38,8 +39,27 @@ impl Mob {
 
     /// MOB "AI". Heuristically decide how to move the MOB.
     /// Returns the new position.
-    pub fn get_move(&self) -> usize {
+    pub fn get_move(&self, game: &Game) -> usize {
         let posn = self.posn;
+
+        // Player in sight. Move toward nearest.
+        let (_, _pposn) = game.field.0
+            .iter()
+            .enumerate()
+            .filter_map(|(pposn, loc)| {
+                if loc.has_player() {
+                    Some((
+                        usize::abs_diff(posn, pposn),
+                        pposn,
+                    ))
+                } else {
+                    None
+                }
+            })
+            .min()
+            .unwrap();
+
+        // Nothing in sight. Just move at random.
         let dirn = random(3);
         match dirn {
             0 => {

@@ -10,6 +10,7 @@
 use crate::*;
 
 /// Game state.
+#[derive(Clone)]
 pub struct Game {
     /// Player ID for *next* client to enter.
     pub next_player_id: u64,
@@ -56,9 +57,11 @@ impl Game {
         }
 
         // Move MOBs.
+        // Need a scratch state for the monsters.
+        let scratch = self.clone();
         for m in self.monsters.values_mut() {
             let posn = m.posn;
-            let new_posn = m.get_move();
+            let new_posn = m.get_move(&scratch);
             if new_posn == posn {
                 continue;
             }

@@ -38,7 +38,7 @@ impl Object {
 }
 
 /// Things that can be in a location.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Loc {
     /// Object in the location.
     pub object: Option<Object>,
@@ -68,6 +68,7 @@ impl Loc {
 /// The playfield is a long vector of locations. It is
 /// created lazily as needed, which would allow infinite
 /// playfields.
+#[derive(Clone)]
 pub struct Field(Vec<Loc>);
 
 #[allow(clippy::len_without_is_empty)]

@@ -49,7 +49,6 @@ pub fn random(r: u64) -> u64 {
 /// the player can have.
 pub const MAX_HEALTH: u64 = 100;
 
-
 /// The game is won by traversing this distance (in tiles)
 /// to the exit door.
 pub const DOOR_POSN: usize = 500;

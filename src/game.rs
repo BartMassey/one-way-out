@@ -237,9 +237,11 @@ impl GameHandle for Mutex<Game> {
             }
 
             // Move MOBs.
-            for m in game.monsters.values_mut() {
+            let mids: Vec<u64> = game.monsters.keys().copied().collect();
+            for mid in mids {
+                let m = game.monsters.get(&mid).unwrap();
                 let posn = m.posn;
-                let new_posn = m.get_move();
+                let new_posn = m.get_move(&game);
                 if new_posn == posn {
                     continue;
                 }
@@ -249,6 +251,8 @@ impl GameHandle for Mutex<Game> {
                 assert_eq!(game.field[posn].top(), Some(&Object::Monster(m.id)));
                 game.field[posn].object = None;
                 game.field[new_posn].object = Some(Object::Monster(m.id));
+
+                let m = game.monsters.get_mut(&mid).unwrap();
                 m.posn = new_posn;
             }
         });

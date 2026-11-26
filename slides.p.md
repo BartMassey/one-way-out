@@ -96,8 +96,8 @@ only 1D Roguelike I know of.
 
 * Architecture:
 
-  * Game world shared by `Arc` `Mutex`. (`Arc` maybe
-    unnecessary.)
+  * Game world shared by `Mutex`. (Was wrapped in `Arc`:
+    this was unnecessary and is now gone.)
 
   * Game state updated by acting client after action.
 

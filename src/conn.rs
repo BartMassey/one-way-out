@@ -6,7 +6,9 @@
 //! Handle a player connection, including telnet processing
 //! and setup as well as starting game play.
 
-use crate::GameHandle;
+use std::sync::Mutex;
+
+use crate::{Game, GameHandle};
 
 use telnet::{
     Action::*,
@@ -318,45 +320,47 @@ impl Connection {
 
     /// Listen for client connections and attach them to the
     /// game via the given runner.
-    pub fn listen(runner: GameHandle) {
-        let listener = TcpListener::bind("0.0.0.0:10001").unwrap();
-        loop {
-            match listener.accept() {
-                Ok((mut socket, addr)) => {
-                    println!("new client: {:?}", addr);
-                    let runner = runner.clone();
-                    let _ = std::thread::spawn(move || {
-                        let mut conn = Connection::new(socket.try_clone().unwrap());
-                        match conn.negotiate_winsize() {
-                            Ok(true) => (),
-                            Ok(false) => eprintln!("no winsize"),
-                            Err(e) => eprintln!("no winsize: {}", e),
-                        }
-                        let termok = conn
-                            .negotiate_cbreak()
-                            .and_then(|_| conn.negotiate_noecho());
-                        match termok {
-                            Ok(true) => (),
-                            e => {
-                                eprintln!("cannot set up terminal: {:?}", e);
-                                socket.write_all(
-    b"Your telnet client cannot be put in no-echo single-character mode\n
-     as needed to play the game. Apologies.\n").unwrap();
-                                socket.flush().unwrap();
-                                return;
+    pub fn listen(runner: Mutex<Game>) {
+        std::thread::scope(|scope| {
+            let listener = TcpListener::bind("0.0.0.0:10001").unwrap();
+            loop {
+                match listener.accept() {
+                    Ok((mut socket, addr)) => {
+                        println!("new client: {:?}", addr);
+                        let runner = &runner;
+                        let _ = scope.spawn(move || {
+                            let mut conn = Connection::new(socket.try_clone().unwrap());
+                            match conn.negotiate_winsize() {
+                                Ok(true) => (),
+                                Ok(false) => eprintln!("no winsize"),
+                                Err(e) => eprintln!("no winsize: {}", e),
                             }
-                        }
-                        // Don't currently need ANSI.
-                        // assert!(conn.negotiate_ansi().unwrap());
-                        conn.set_timeout(Some(100));
-                        runner.play(conn);
-                    });
-                }
-                Err(e) => {
-                    println!("couldn't get client: {:?}", e);
+                            let termok = conn
+                                .negotiate_cbreak()
+                                .and_then(|_| conn.negotiate_noecho());
+                            match termok {
+                                Ok(true) => (),
+                                e => {
+                                    eprintln!("cannot set up terminal: {:?}", e);
+                                    socket.write_all(
+        b"Your telnet client cannot be put in no-echo single-character mode\n
+         as needed to play the game. Apologies.\n").unwrap();
+                                    socket.flush().unwrap();
+                                    return;
+                                }
+                            }
+                            // Don't currently need ANSI.
+                            // assert!(conn.negotiate_ansi().unwrap());
+                            conn.set_timeout(Some(100));
+                            runner.play(conn);
+                        });
+                    }
+                    Err(e) => {
+                        println!("couldn't get client: {:?}", e);
+                    }
                 }
             }
-        }
+        });
     }
 }
 
